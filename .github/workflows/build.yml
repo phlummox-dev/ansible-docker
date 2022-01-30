@@ -68,3 +68,38 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # not sure this is actually needed
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: print stuff
+        shell: bash
+        run: |
+          printf 'tags are: <<%s>>\n' "${{ steps.meta.outputs.tags }}"
+          printf 'tags labels are: <<%s>>\n' "${{ steps.meta.outputs.labels }}"
+          printf 'repos is: <<%s>>\n' "${{ github.repository }}"
+
+      # really, this is just using info that _mostly_
+      # could've been got from makefile.
+      # But some is from CI environment.
+      - name: Build Docker image
+        shell: bash
+        run: |
+          set -x
+
+          export IMAGE_NAME="${{ steps.info.outputs.IMAGE_NAME }}"
+          export GH_IMAGE_ID="${{ env.REGISTRY }}/${{ github.repository }}/${{ steps.info.outputs.IMAGE_NAME }}"
+          export IMAGE_VERSION="${{ steps.info.outputs.IMAGE_VERSION }}"
+          export REPO_OWNER="${{ github.repository_owner }}"
+
+          echo "${{ steps.meta.outputs.labels }}" > oc_labels
+          # "
+
+          python3 ./build.py
+
