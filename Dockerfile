@@ -66,7 +66,7 @@ COPY --from=builder /opt/wheel /opt/wheel
 
 RUN \
   set -x && pip3 install --upgrade pip && \
-  pip3 install /opt/wheel/* && \
+  pip3 install --ignore-installed /opt/wheel/* && \
   rm -rf /opt/wheel
 
 # create a user
